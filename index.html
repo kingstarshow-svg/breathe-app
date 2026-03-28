@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="呼吸训练">
+    <title>呼吸循环训练</title>
+
+    <style>
+        /* ========== 全部样式内联 ========== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        #app {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        #circle-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+        }
+
+        #circle {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(56,189,248,0.2) 0%, rgba(2,132,199,0.5) 100%);
+            box-shadow: 0 0 40px rgba(56,189,248,0.3);
+            transform: scale(1);
+            transition: transform 1s ease;
+        }
+
+        /* 吸气动画：4秒放大 */
+        #circle.breathe-in {
+            transform: scale(2.5);
+            transition: transform 4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* 呼气动画：8秒缩小 */
+        #circle.breathe-out {
+            transform: scale(1);
+            transition: transform 8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+        }
+
+        #status-text {
+            font-size: 3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            letter-spacing: 2px;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            height: 4rem;
+            line-height: 4rem;
+        }
+
+        #sub-text {
+            font-size: 1.2rem;
+            color: #94a3b8;
+            margin-bottom: 3rem;
+            height: 1.5rem;
+        }
+
+        #start-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            padding: 16px 40px;
+            font-size: 1.2rem;
+            border-radius: 30px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        #start-btn:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        #start-btn.hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div id="circle-container">
+            <div id="circle"></div>
+        </div>
+        <div id="content">
+            <h1 id="status-text">深呼吸训练</h1>
+            <p id="sub-text">准备好后点击下方按钮</p>
+            <button id="start-btn">开始训练</button>
+        </div>
+    </div>
+
+    <script>
+        /* ========== 全部逻辑内联 ========== */
+        document.addEventListener('DOMContentLoaded', () => {
+            const startBtn = document.getElementById('start-btn');
+            const statusText = document.getElementById('status-text');
+            const subText = document.getElementById('sub-text');
+            const circle = document.getElementById('circle');
+
+            let loopTimeout;
+            let isRunning = false;
+            let currentLoopCount = 0;
+            const MAX_LOOPS = 15;
+
+            // 播放中文语音
+            function speak(text) {
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = 'zh-CN';
+                    utterance.rate = 0.9;
+                    utterance.pitch = 1.0;
+                    window.speechSynthesis.speak(utterance);
+                }
+            }
+
+            // 点击开始
+            startBtn.addEventListener('click', () => {
+                if (isRunning) return;
+                isRunning = true;
+                currentLoopCount = 0;
+                clearTimeout(loopTimeout);
+                circle.className = '';
+
+                // iOS 需要在用户手势中首次触发 TTS 解锁
+                const initUtterance = new SpeechSynthesisUtterance('');
+                window.speechSynthesis.speak(initUtterance);
+
+                startBtn.classList.add('hidden');
+                subText.innerText = '';
+                startCountdown(3);
+            });
+
+            // 3秒倒计时
+            function startCountdown(secondsLeft) {
+                if (secondsLeft > 0) {
+                    statusText.innerText = secondsLeft;
+                    setTimeout(() => startCountdown(secondsLeft - 1), 1000);
+                } else {
+                    startLoop();
+                }
+            }
+
+            // 呼吸循环主体
+            function startLoop() {
+                // 15轮后停止
+                if (currentLoopCount >= MAX_LOOPS) {
+                    statusText.innerText = '停止';
+                    subText.innerText = '已完成 15 次呼吸训练 🎉';
+                    speak('停止');
+                    circle.className = '';
+                    setTimeout(() => {
+                        startBtn.innerText = '重新开始';
+                        startBtn.classList.remove('hidden');
+                        isRunning = false;
+                    }, 2000);
+                    return;
+                }
+
+                currentLoopCount++;
+
+                // 吸气 4秒
+                statusText.innerText = '吸气';
+                subText.innerText = '4秒 (' + currentLoopCount + '/' + MAX_LOOPS + ')';
+                speak('吸气');
+                circle.className = 'breathe-in';
+
+                loopTimeout = setTimeout(() => {
+                    // 呼气 8秒
+                    statusText.innerText = '呼气';
+                    subText.innerText = '8秒 (' + currentLoopCount + '/' + MAX_LOOPS + ')';
+                    speak('呼气');
+                    circle.className = 'breathe-out';
+
+                    loopTimeout = setTimeout(() => startLoop(), 8000);
+                }, 4000);
+            }
+        });
+    </script>
+</body>
+</html>

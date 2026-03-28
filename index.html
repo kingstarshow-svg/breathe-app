@@ -9,7 +9,7 @@
     <title>呼吸循环训练</title>
 
     <style>
-        /* ========== 全部样式内联 ========== */
+        /* ========== 基础重置 ========== */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -24,23 +24,212 @@
             height: 100%;
             background-color: #0f172a;
             color: #f8fafc;
-            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
             overflow: hidden;
         }
 
-        #app {
-            position: relative;
+        /* ========== 视图容器 ========== */
+        .view {
+            display: none;
             width: 100%;
             height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            position: absolute;
+            top: 0;
+            left: 0;
             flex-direction: column;
         }
+        .view.active {
+            display: flex;
+        }
 
+        /* ========== 顶部导航栏 ========== */
+        .nav-bar {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            padding-top: max(16px, env(safe-area-inset-top));
+            min-height: 60px;
+            flex-shrink: 0;
+        }
+        .nav-bar h2 {
+            flex: 1;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        .nav-btn {
+            background: none;
+            border: none;
+            color: #38bdf8;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 8px;
+            min-width: 50px;
+        }
+
+        /* ========== 主页 - 循环列表 ========== */
+        .list-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 20px 100px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .empty-hint {
+            text-align: center;
+            color: #64748b;
+            margin-top: 80px;
+            font-size: 1.1rem;
+            line-height: 2;
+        }
+        .loop-card {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 18px 20px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .loop-card:active {
+            background: rgba(255,255,255,0.12);
+        }
+        .loop-card-info {
+            flex: 1;
+        }
+        .loop-card-name {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .loop-card-detail {
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+        .loop-card-arrow {
+            color: #475569;
+            font-size: 1.2rem;
+            margin-left: 10px;
+        }
+        .loop-card-delete {
+            background: none;
+            border: none;
+            color: #ef4444;
+            font-size: 0.85rem;
+            padding: 6px 10px;
+            margin-left: 8px;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+        .loop-card-delete:active {
+            background: rgba(239,68,68,0.2);
+        }
+
+        /* 底部浮动创建按钮 */
+        .fab {
+            position: fixed;
+            bottom: max(30px, env(safe-area-inset-bottom));
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #0ea5e9, #6366f1);
+            border: none;
+            color: #fff;
+            padding: 16px 36px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 6px 24px rgba(14,165,233,0.4);
+            transition: transform 0.15s, box-shadow 0.15s;
+            z-index: 100;
+            letter-spacing: 1px;
+        }
+        .fab:active {
+            transform: translateX(-50%) scale(0.95);
+            box-shadow: 0 3px 12px rgba(14,165,233,0.3);
+        }
+
+        /* ========== 创建页面 ========== */
+        .form-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .form-group {
+            margin-bottom: 24px;
+        }
+        .form-label {
+            display: block;
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin-bottom: 8px;
+        }
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 12px;
+            color: #f8fafc;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+            /* 允许在输入框中选择文本 */
+            -webkit-user-select: text;
+            user-select: text;
+        }
+        .form-input:focus {
+            border-color: #38bdf8;
+        }
+        .form-input::placeholder {
+            color: #475569;
+        }
+
+        .step-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .step-card-title {
+            font-size: 0.95rem;
+            color: #38bdf8;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        .step-card .form-group {
+            margin-bottom: 14px;
+        }
+        .step-card .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #0ea5e9, #6366f1);
+            border: none;
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: transform 0.15s;
+        }
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        /* ========== 播放页面 ========== */
+        #play-view {
+            justify-content: center;
+            align-items: center;
+        }
         #circle-container {
             position: absolute;
             width: 100%;
@@ -50,7 +239,6 @@
             align-items: center;
             z-index: 1;
         }
-
         #circle {
             width: 200px;
             height: 200px;
@@ -58,166 +246,417 @@
             background: radial-gradient(circle, rgba(56,189,248,0.2) 0%, rgba(2,132,199,0.5) 100%);
             box-shadow: 0 0 40px rgba(56,189,248,0.3);
             transform: scale(1);
-            transition: transform 1s ease;
+            transition: transform 0.5s ease;
         }
-
-        /* 吸气动画：4秒放大 */
-        #circle.breathe-in {
+        #circle.expand {
             transform: scale(2.5);
-            transition: transform 4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
-        /* 呼气动画：8秒缩小 */
-        #circle.breathe-out {
-            transform: scale(1);
-            transition: transform 8s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        #content {
+        #play-content {
             position: relative;
             z-index: 10;
             text-align: center;
         }
-
-        #status-text {
+        #play-status {
             font-size: 3rem;
             font-weight: 600;
-            margin-bottom: 1rem;
             letter-spacing: 2px;
             text-shadow: 0 4px 10px rgba(0,0,0,0.5);
             height: 4rem;
             line-height: 4rem;
+            margin-bottom: 0.8rem;
         }
-
-        #sub-text {
+        #play-sub {
             font-size: 1.2rem;
             color: #94a3b8;
             margin-bottom: 3rem;
             height: 1.5rem;
         }
-
-        #start-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: #fff;
-            padding: 16px 40px;
-            font-size: 1.2rem;
+        #stop-btn {
+            background: rgba(239,68,68,0.2);
+            border: 1px solid rgba(239,68,68,0.4);
+            color: #fca5a5;
+            padding: 14px 40px;
+            font-size: 1rem;
             border-radius: 30px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.15s;
         }
-
-        #start-btn:active {
+        #stop-btn:active {
             transform: scale(0.95);
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        #start-btn.hidden {
-            display: none;
+            background: rgba(239,68,68,0.35);
         }
     </style>
 </head>
 <body>
-    <div id="app">
+
+    <!-- ==================== 主页视图 ==================== -->
+    <div id="home-view" class="view active">
+        <div class="nav-bar">
+            <span class="nav-btn"></span>
+            <h2>呼吸训练</h2>
+            <span class="nav-btn"></span>
+        </div>
+        <div class="list-area" id="loop-list">
+            <div class="empty-hint" id="empty-hint">
+                还没有创建任何循环<br>点击下方按钮开始创建
+            </div>
+        </div>
+        <button class="fab" id="create-btn">＋ 创建循环</button>
+    </div>
+
+    <!-- ==================== 创建视图 - 第一步 ==================== -->
+    <div id="create-step1-view" class="view">
+        <div class="nav-bar">
+            <button class="nav-btn" id="step1-back">取消</button>
+            <h2>基本设置</h2>
+            <span class="nav-btn"></span>
+        </div>
+        <div class="form-area">
+            <div class="form-group">
+                <label class="form-label">循环名称</label>
+                <input class="form-input" id="input-name" type="text" placeholder="例如：4-7-8呼吸法">
+            </div>
+            <div class="form-group">
+                <label class="form-label">准备时间（秒）</label>
+                <input class="form-input" id="input-prep" type="number" placeholder="例如：3" value="3">
+            </div>
+            <div class="form-group">
+                <label class="form-label">循环次数</label>
+                <input class="form-input" id="input-count" type="number" placeholder="例如：15" value="15">
+            </div>
+            <div class="form-group">
+                <label class="form-label">每个循环包含几个步骤</label>
+                <input class="form-input" id="input-steps" type="number" placeholder="例如：2（吸气+呼气）" value="2">
+            </div>
+            <button class="btn-primary" id="to-step2-btn">下一步</button>
+        </div>
+    </div>
+
+    <!-- ==================== 创建视图 - 第二步 ==================== -->
+    <div id="create-step2-view" class="view">
+        <div class="nav-bar">
+            <button class="nav-btn" id="step2-back">上一步</button>
+            <h2>设置步骤</h2>
+            <span class="nav-btn"></span>
+        </div>
+        <div class="form-area">
+            <div id="steps-form-container">
+                <!-- 动态生成的步骤输入卡片 -->
+            </div>
+            <button class="btn-primary" id="save-btn">保存循环</button>
+        </div>
+    </div>
+
+    <!-- ==================== 播放视图 ==================== -->
+    <div id="play-view" class="view">
         <div id="circle-container">
             <div id="circle"></div>
         </div>
-        <div id="content">
-            <h1 id="status-text">深呼吸训练</h1>
-            <p id="sub-text">准备好后点击下方按钮</p>
-            <button id="start-btn">开始训练</button>
+        <div id="play-content">
+            <h1 id="play-status">准备</h1>
+            <p id="play-sub"></p>
+            <button id="stop-btn">停止</button>
         </div>
     </div>
 
     <script>
-        /* ========== 全部逻辑内联 ========== */
-        document.addEventListener('DOMContentLoaded', () => {
-            const startBtn = document.getElementById('start-btn');
-            const statusText = document.getElementById('status-text');
-            const subText = document.getElementById('sub-text');
-            const circle = document.getElementById('circle');
+        /* ========================================================================
+         *  数据层：使用 localStorage 持久化所有用户创建的循环
+         * ======================================================================== */
 
-            let loopTimeout;
-            let isRunning = false;
-            let currentLoopCount = 0;
-            const MAX_LOOPS = 15;
-
-            // 播放中文语音
-            function speak(text) {
-                if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel();
-                    const utterance = new SpeechSynthesisUtterance(text);
-                    utterance.lang = 'zh-CN';
-                    utterance.rate = 0.9;
-                    utterance.pitch = 1.0;
-                    window.speechSynthesis.speak(utterance);
-                }
+        // 获取已保存的循环列表
+        function getLoops() {
+            try {
+                return JSON.parse(localStorage.getItem('breathe_loops') || '[]');
+            } catch (e) {
+                return [];
             }
+        }
 
-            // 点击开始
-            startBtn.addEventListener('click', () => {
-                if (isRunning) return;
-                isRunning = true;
-                currentLoopCount = 0;
-                clearTimeout(loopTimeout);
-                circle.className = '';
+        // 保存循环列表
+        function saveLoops(loops) {
+            localStorage.setItem('breathe_loops', JSON.stringify(loops));
+        }
 
-                // iOS 需要在用户手势中首次触发 TTS 解锁
-                const initUtterance = new SpeechSynthesisUtterance('');
-                window.speechSynthesis.speak(initUtterance);
+        /* ========================================================================
+         *  视图切换
+         * ======================================================================== */
+        const views = {
+            home:   document.getElementById('home-view'),
+            step1:  document.getElementById('create-step1-view'),
+            step2:  document.getElementById('create-step2-view'),
+            play:   document.getElementById('play-view')
+        };
 
-                startBtn.classList.add('hidden');
-                subText.innerText = '';
-                startCountdown(3);
+        function showView(name) {
+            Object.values(views).forEach(v => v.classList.remove('active'));
+            views[name].classList.add('active');
+        }
+
+        /* ========================================================================
+         *  主页：渲染循环列表
+         * ======================================================================== */
+        const loopListEl = document.getElementById('loop-list');
+        const emptyHintEl = document.getElementById('empty-hint');
+
+        function renderHome() {
+            const loops = getLoops();
+            // 清空旧卡片（保留空提示）
+            loopListEl.querySelectorAll('.loop-card').forEach(c => c.remove());
+
+            if (loops.length === 0) {
+                emptyHintEl.style.display = 'block';
+                return;
+            }
+            emptyHintEl.style.display = 'none';
+
+            loops.forEach((loop, index) => {
+                const totalSec = loop.steps.reduce((s, st) => s + st.duration, 0);
+                const card = document.createElement('div');
+                card.className = 'loop-card';
+                card.innerHTML =
+                    '<div class="loop-card-info">' +
+                        '<div class="loop-card-name">' + escapeHtml(loop.name) + '</div>' +
+                        '<div class="loop-card-detail">' +
+                            loop.loopCount + ' 次循环 · ' +
+                            loop.steps.length + ' 个步骤 · 每轮 ' + totalSec + ' 秒' +
+                        '</div>' +
+                    '</div>' +
+                    '<span class="loop-card-arrow">▶</span>' +
+                    '<button class="loop-card-delete" data-index="' + index + '">删除</button>';
+
+                // 点击卡片 → 播放
+                card.querySelector('.loop-card-info').addEventListener('click', () => startPlay(loop));
+                card.querySelector('.loop-card-arrow').addEventListener('click', () => startPlay(loop));
+
+                // 点击删除
+                card.querySelector('.loop-card-delete').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const loops = getLoops();
+                    loops.splice(index, 1);
+                    saveLoops(loops);
+                    renderHome();
+                });
+
+                loopListEl.appendChild(card);
             });
+        }
 
-            // 3秒倒计时
-            function startCountdown(secondsLeft) {
-                if (secondsLeft > 0) {
-                    statusText.innerText = secondsLeft;
-                    setTimeout(() => startCountdown(secondsLeft - 1), 1000);
-                } else {
-                    startLoop();
-                }
+        // 防止 XSS
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        /* ========================================================================
+         *  创建循环 - 第一步
+         * ======================================================================== */
+        document.getElementById('create-btn').addEventListener('click', () => {
+            // 重置表单
+            document.getElementById('input-name').value = '';
+            document.getElementById('input-prep').value = '3';
+            document.getElementById('input-count').value = '15';
+            document.getElementById('input-steps').value = '2';
+            showView('step1');
+        });
+
+        document.getElementById('step1-back').addEventListener('click', () => {
+            showView('home');
+        });
+
+        /* ========================================================================
+         *  创建循环 - 第二步：动态生成步骤表单
+         * ======================================================================== */
+        const stepsContainer = document.getElementById('steps-form-container');
+
+        document.getElementById('to-step2-btn').addEventListener('click', () => {
+            const stepCount = parseInt(document.getElementById('input-steps').value) || 0;
+            if (stepCount < 1 || stepCount > 20) {
+                alert('步骤数量请填写 1~20 之间的数字');
+                return;
+            }
+            const name = document.getElementById('input-name').value.trim();
+            if (!name) {
+                alert('请输入循环名称');
+                return;
             }
 
-            // 呼吸循环主体
-            function startLoop() {
-                // 15轮后停止
-                if (currentLoopCount >= MAX_LOOPS) {
-                    statusText.innerText = '停止';
-                    subText.innerText = '已完成 15 次呼吸训练 🎉';
-                    speak('停止');
-                    circle.className = '';
-                    setTimeout(() => {
-                        startBtn.innerText = '重新开始';
-                        startBtn.classList.remove('hidden');
-                        isRunning = false;
-                    }, 2000);
+            // 动态生成步骤输入卡片
+            stepsContainer.innerHTML = '';
+            for (let i = 0; i < stepCount; i++) {
+                const card = document.createElement('div');
+                card.className = 'step-card';
+                card.innerHTML =
+                    '<div class="step-card-title">步骤 ' + (i + 1) + '</div>' +
+                    '<div class="form-group">' +
+                        '<label class="form-label">名称（将被语音播放）</label>' +
+                        '<input class="form-input step-name" type="text" placeholder="例如：吸气">' +
+                    '</div>' +
+                    '<div class="form-group">' +
+                        '<label class="form-label">持续时间（秒）</label>' +
+                        '<input class="form-input step-duration" type="number" placeholder="例如：4">' +
+                    '</div>';
+                stepsContainer.appendChild(card);
+            }
+
+            showView('step2');
+        });
+
+        document.getElementById('step2-back').addEventListener('click', () => {
+            showView('step1');
+        });
+
+        /* ========================================================================
+         *  保存循环
+         * ======================================================================== */
+        document.getElementById('save-btn').addEventListener('click', () => {
+            const name = document.getElementById('input-name').value.trim();
+            const prepTime = parseInt(document.getElementById('input-prep').value) || 3;
+            const loopCount = parseInt(document.getElementById('input-count').value) || 15;
+
+            // 收集所有步骤
+            const nameEls = stepsContainer.querySelectorAll('.step-name');
+            const durEls = stepsContainer.querySelectorAll('.step-duration');
+            const steps = [];
+
+            for (let i = 0; i < nameEls.length; i++) {
+                const sName = nameEls[i].value.trim();
+                const sDur = parseInt(durEls[i].value);
+                if (!sName) {
+                    alert('请填写步骤 ' + (i + 1) + ' 的名称');
                     return;
                 }
-
-                currentLoopCount++;
-
-                // 吸气 4秒
-                statusText.innerText = '吸气';
-                subText.innerText = '4秒 (' + currentLoopCount + '/' + MAX_LOOPS + ')';
-                speak('吸气');
-                circle.className = 'breathe-in';
-
-                loopTimeout = setTimeout(() => {
-                    // 呼气 8秒
-                    statusText.innerText = '呼气';
-                    subText.innerText = '8秒 (' + currentLoopCount + '/' + MAX_LOOPS + ')';
-                    speak('呼气');
-                    circle.className = 'breathe-out';
-
-                    loopTimeout = setTimeout(() => startLoop(), 8000);
-                }, 4000);
+                if (!sDur || sDur < 1) {
+                    alert('步骤 ' + (i + 1) + ' 的持续时间需大于 0');
+                    return;
+                }
+                steps.push({ name: sName, duration: sDur });
             }
+
+            // 组装数据并保存
+            const loop = { name: name, prepTime: prepTime, loopCount: loopCount, steps: steps };
+            const loops = getLoops();
+            loops.push(loop);
+            saveLoops(loops);
+
+            // 返回主页
+            showView('home');
+            renderHome();
         });
+
+        /* ========================================================================
+         *  播放引擎
+         * ======================================================================== */
+        const circle = document.getElementById('circle');
+        const playStatus = document.getElementById('play-status');
+        const playSub = document.getElementById('play-sub');
+        let playTimer = null;
+        let isPlaying = false;
+
+        // 语音播报
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(text);
+                u.lang = 'zh-CN';
+                u.rate = 0.9;
+                window.speechSynthesis.speak(u);
+            }
+        }
+
+        // 开始播放一个循环配置
+        function startPlay(loop) {
+            isPlaying = true;
+            showView('play');
+
+            // iOS 需要在用户手势中解锁 TTS
+            const init = new SpeechSynthesisUtterance('');
+            window.speechSynthesis.speak(init);
+
+            // 先进入准备倒计时
+            playSub.innerText = '';
+            circle.className = '';
+            countdown(loop.prepTime, () => {
+                // 倒计时结束，开始循环
+                runLoop(loop, 1);
+            });
+        }
+
+        // 倒计时
+        function countdown(sec, cb) {
+            if (!isPlaying) return;
+            if (sec > 0) {
+                playStatus.innerText = sec;
+                playSub.innerText = '准备中…';
+                playTimer = setTimeout(() => countdown(sec - 1, cb), 1000);
+            } else {
+                cb();
+            }
+        }
+
+        // 执行循环
+        function runLoop(loop, currentRound) {
+            if (!isPlaying) return;
+            if (currentRound > loop.loopCount) {
+                // 全部完成
+                playStatus.innerText = '完成';
+                playSub.innerText = '已完成全部 ' + loop.loopCount + ' 次循环 🎉';
+                speak('停止');
+                circle.className = '';
+                playTimer = setTimeout(() => {
+                    if (!isPlaying) return;
+                    showView('home');
+                    isPlaying = false;
+                }, 3000);
+                return;
+            }
+
+            // 依次执行该轮所有步骤
+            runStep(loop, currentRound, 0);
+        }
+
+        // 执行单个步骤
+        function runStep(loop, currentRound, stepIndex) {
+            if (!isPlaying) return;
+            if (stepIndex >= loop.steps.length) {
+                // 该轮所有步骤结束 → 进入下一轮
+                runLoop(loop, currentRound + 1);
+                return;
+            }
+
+            const step = loop.steps[stepIndex];
+            playStatus.innerText = step.name;
+            playSub.innerText = step.duration + '秒 (' + currentRound + '/' + loop.loopCount + ')';
+            speak(step.name);
+
+            // 动画：奇数步骤放大，偶数步骤缩小，给圆圈生命力
+            circle.style.transition = 'transform ' + step.duration + 's cubic-bezier(0.4, 0, 0.2, 1)';
+            if (stepIndex % 2 === 0) {
+                circle.className = 'expand';
+            } else {
+                circle.className = '';
+            }
+
+            playTimer = setTimeout(() => {
+                runStep(loop, currentRound, stepIndex + 1);
+            }, step.duration * 1000);
+        }
+
+        // 停止按钮
+        document.getElementById('stop-btn').addEventListener('click', () => {
+            isPlaying = false;
+            clearTimeout(playTimer);
+            window.speechSynthesis.cancel();
+            circle.className = '';
+            circle.style.transition = 'transform 0.5s ease';
+            showView('home');
+        });
+
+        /* ========================================================================
+         *  初始化
+         * ======================================================================== */
+        renderHome();
     </script>
 </body>
 </html>

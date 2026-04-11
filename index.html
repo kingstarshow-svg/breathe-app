@@ -296,6 +296,9 @@
             <h2>呼吸训练</h2>
             <span class="nav-btn"></span>
         </div>
+        <div style="padding: 10px 20px 0;">
+            <button class="btn-primary" id="infinite-count-btn" style="background: linear-gradient(135deg, #10b981, #059669); margin-top: 0; border-radius: 16px; min-height: 54px; letter-spacing: 1px;">▶ 开始无限报数</button>
+        </div>
         <div class="list-area" id="loop-list">
             <div class="empty-hint" id="empty-hint">
                 还没有创建任何循环<br>点击下方按钮开始创建
@@ -650,7 +653,42 @@
             window.speechSynthesis.cancel();
             circle.className = '';
             circle.style.transition = 'transform 0.5s ease';
+            circle.style.transform = '';
             showView('home');
+        });
+
+        /* ========================================================================
+         *  无限报数逻辑
+         * ======================================================================== */
+        document.getElementById('infinite-count-btn').addEventListener('click', () => {
+            isPlaying = true;
+            showView('play');
+            
+            const init = new SpeechSynthesisUtterance('');
+            window.speechSynthesis.speak(init);
+
+            playSub.innerText = '持续报数';
+            circle.className = '';
+            circle.style.transition = 'transform 1s ease';
+
+            countdown(3, () => {
+                let count = 1;
+                function reportNext() {
+                    if (!isPlaying) return;
+                    playStatus.innerText = count;
+                    speak(count.toString());
+                    
+                    if (count % 2 !== 0) {
+                        circle.style.transform = 'scale(1.5)';
+                    } else {
+                        circle.style.transform = 'scale(1)';
+                    }
+                    
+                    count++;
+                    playTimer = setTimeout(reportNext, 1000);
+                }
+                reportNext();
+            });
         });
 
         /* ========================================================================

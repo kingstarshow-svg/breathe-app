@@ -297,7 +297,7 @@
             <span class="nav-btn"></span>
         </div>
         <div style="padding: 10px 20px 0;">
-            <button class="btn-primary" id="infinite-count-btn" style="background: linear-gradient(135deg, #10b981, #059669); margin-top: 0; border-radius: 16px; min-height: 54px; letter-spacing: 1px;">▶ 开始无限报数</button>
+            <button class="btn-primary" id="infinite-count-btn" style="background: linear-gradient(135deg, #10b981, #059669); margin-top: 0; border-radius: 16px; min-height: 54px; letter-spacing: 1px;">▶ 30秒循环报数</button>
         </div>
         <div class="list-area" id="loop-list">
             <div class="empty-hint" id="empty-hint">
@@ -658,7 +658,7 @@
         });
 
         /* ========================================================================
-         *  无限报数逻辑
+         *  30秒循环报数逻辑
          * ======================================================================== */
         document.getElementById('infinite-count-btn').addEventListener('click', () => {
             isPlaying = true;
@@ -667,7 +667,7 @@
             const init = new SpeechSynthesisUtterance('');
             window.speechSynthesis.speak(init);
 
-            playSub.innerText = '持续报数';
+            playSub.innerText = '30秒循环报数';
             circle.className = '';
             circle.style.transition = 'transform 1s ease';
 
@@ -685,6 +685,9 @@
                     }
                     
                     count++;
+                    if (count > 30) {
+                        count = 1;
+                    }
                     playTimer = setTimeout(reportNext, 1000);
                 }
                 reportNext();

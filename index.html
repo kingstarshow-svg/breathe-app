@@ -676,9 +676,10 @@
                 function reportNext() {
                     if (!isPlaying) return;
                     playStatus.innerText = count;
-                    speak(count.toString());
                     
-                    if (count % 2 !== 0) {
+                    // 只在 1, 5, 10, 15, 20, 25, 30 报数和播放动画
+                    if (count === 1 || count % 5 === 0) {
+                        speak(count.toString());
                         circle.style.transform = 'scale(1.5)';
                     } else {
                         circle.style.transform = 'scale(1)';

@@ -557,6 +557,24 @@
         let playTimer = null;
         let isPlaying = false;
 
+        // 屏幕常亮唤醒锁 (Wake Lock)
+        let wakeLock = null;
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    console.log('Screen Wake Lock is active');
+                }
+            } catch (err) {
+                console.log('Wake Lock error:', err);
+            }
+        }
+        function releaseWakeLock() {
+            if (wakeLock !== null) {
+                wakeLock.release().then(() => { wakeLock = null; console.log('Screen Wake Lock released'); });
+            }
+        }
+
         // 语音播报
         function speak(text) {
             if ('speechSynthesis' in window) {
@@ -571,6 +589,7 @@
         // 开始播放一个循环配置
         function startPlay(loop) {
             isPlaying = true;
+            requestWakeLock();
             showView('play');
 
             // iOS 需要在用户手势中解锁 TTS
@@ -611,6 +630,7 @@
                     if (!isPlaying) return;
                     showView('home');
                     isPlaying = false;
+                    releaseWakeLock();
                 }, 3000);
                 return;
             }
@@ -649,6 +669,7 @@
         // 停止按钮
         document.getElementById('stop-btn').addEventListener('click', () => {
             isPlaying = false;
+            releaseWakeLock();
             clearTimeout(playTimer);
             window.speechSynthesis.cancel();
             circle.className = '';
@@ -662,6 +683,7 @@
          * ======================================================================== */
         document.getElementById('infinite-count-btn').addEventListener('click', () => {
             isPlaying = true;
+            requestWakeLock();
             showView('play');
             
             const init = new SpeechSynthesisUtterance('');
